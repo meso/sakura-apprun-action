@@ -1,15 +1,15 @@
 name: 'Deploy Node.js to Sakura AppRun'
 description: 'Build and deploy Node.js applications to Sakura AppRun'
-author: 'Your Name'
+author: 'Toshihiro Shimizu'
 branding:
   icon: 'cloud'
-  color: 'pink'
+  color: 'purple'
 
 inputs:
   dockerfile-url:
     description: 'URL to download Dockerfile from'
     required: false
-    default: 'https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/Dockerfile.node'
+    default: 'https://raw.githubusercontent.com/meso/sakura-apprun-action/main/Dockerfile.node'
   sakura-api-key:
     description: 'Sakura Cloud API Key'
     required: true
