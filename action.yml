@@ -98,7 +98,9 @@ runs:
         context: .
         platforms: linux/amd64
         push: true
-        tags: ${{ inputs.container-registry }}/${{ steps.app-name.outputs.name }}:latest
+        tags: |
+          ${{ inputs.container-registry }}/${{ steps.app-name.outputs.name }}:latest
+          ${{ inputs.container-registry }}/${{ steps.app-name.outputs.name }}:${{ github.sha }}
         provenance: false
         
     - name: Deploy to AppRun
@@ -118,12 +120,12 @@ runs:
           "max_scale": 1,
           "components": [
             {
-              "name": "${{ steps.app-name.outputs.name }}:latest",
+              "name": "${{ steps.app-name.outputs.name }}:${{ github.sha }}",
               "max_cpu": "${{ inputs.max-cpu }}",
               "max_memory": "${{ inputs.max-memory }}",
               "deploy_source": {
                 "container_registry": {
-                  "image": "${{ inputs.container-registry }}/${{ steps.app-name.outputs.name }}:latest",
+                  "image": "${{ inputs.container-registry }}/${{ steps.app-name.outputs.name }}:${{ github.sha }}",
                   "server": "${{ inputs.container-registry }}",
                   "username": "${{ inputs.container-registry-user }}",
                   "password": "${{ inputs.container-registry-password }}"
@@ -135,12 +137,33 @@ runs:
         EOF
         )
         
-        # Deploy to AppRun
-        RESPONSE=$(curl -s -X POST \
+        # Check if application already exists
+        APP_NAME="${{ steps.app-name.outputs.name }}"
+        EXISTING_APPS=$(curl -s -X GET \
           -H "Authorization: Basic ${AUTH}" \
           -H "Content-Type: application/json" \
-          -d "${REQUEST_BODY}" \
           https://secure.sakura.ad.jp/cloud/api/apprun/1.0/apprun/api/applications)
+        
+        # Extract app ID if exists
+        APP_ID=$(echo "$EXISTING_APPS" | grep -o "\"id\":\"[^\"]*\".*\"name\":\"$APP_NAME\"" | grep -o "\"id\":\"[^\"]*\"" | sed 's/"id":"//' | sed 's/"//')
+        
+        if [ -n "$APP_ID" ]; then
+          echo "Updating existing application: $APP_ID"
+          # Update existing application
+          RESPONSE=$(curl -s -X PATCH \
+            -H "Authorization: Basic ${AUTH}" \
+            -H "Content-Type: application/json" \
+            -d "${REQUEST_BODY}" \
+            https://secure.sakura.ad.jp/cloud/api/apprun/1.0/apprun/api/applications/${APP_ID})
+        else
+          echo "Creating new application"
+          # Create new application
+          RESPONSE=$(curl -s -X POST \
+            -H "Authorization: Basic ${AUTH}" \
+            -H "Content-Type: application/json" \
+            -d "${REQUEST_BODY}" \
+            https://secure.sakura.ad.jp/cloud/api/apprun/1.0/apprun/api/applications)
+        fi
         
         # Extract values
         PUBLIC_URL=$(echo "$RESPONSE" | grep -o '"public_url":"[^"]*' | sed 's/"public_url":"//')

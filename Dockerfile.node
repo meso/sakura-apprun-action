@@ -1,18 +1,36 @@
-FROM node:22-alpine
+# ビルドステージ
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
 # package*.jsonをコピー（package-lock.jsonも含む）
 COPY package*.json ./
 
-# 本番用の依存関係のみインストール
-RUN npm ci --only=production || npm install --production
+# 全ての依存関係をインストール（devDependenciesを含む）
+RUN npm ci || npm install
 
 # アプリケーションのソースをコピー
 COPY . .
 
-# ビルドステップ（必要な場合のみ実行）
-RUN npm run build || true
+# ビルドを実行
+RUN npm run build
+
+# 実行ステージ
+FROM node:22-alpine
+
+WORKDIR /app
+
+# package*.jsonをコピー
+COPY package*.json ./
+
+# 本番用の依存関係のみインストール
+RUN npm ci --only=production || npm install --production
+
+# ビルドステージから成果物をコピー
+COPY --from=builder /app/dist ./dist
+
+# 必要に応じて他のファイルもコピー（例：public, views等）
+# COPY --from=builder /app/public ./public
 
 # 環境変数
 ENV NODE_ENV=production
