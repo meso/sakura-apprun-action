@@ -139,54 +139,60 @@ runs:
         # Create auth header
         AUTH=$(echo -n "${{ inputs.sakura-api-key }}:${{ inputs.sakura-api-secret }}" | base64 | tr -d '\n')
         
-        # Create request body
-        REQUEST_BODY=$(cat <<EOF
-        {
-          "name": "${{ steps.app-name.outputs.name }}",
-          "timeout_seconds": ${{ inputs.timeout-seconds }},
-          "port": ${{ inputs.port }},
-          "min_scale": 0,
-          "max_scale": 1,
-          "components": [
-            {
-              "name": "${{ steps.app-name.outputs.name }}:${{ github.sha }}",
-              "max_cpu": "${{ inputs.max-cpu }}",
-              "max_memory": "${{ inputs.max-memory }}",
-              "deploy_source": {
-                "container_registry": {
-                  "image": "${{ inputs.container-registry }}/${{ steps.app-name.outputs.name }}:${{ github.sha }}",
-                  "server": "${{ inputs.container-registry }}",
-                  "username": "${{ inputs.container-registry-user }}",
-                  "password": "${{ inputs.container-registry-password }}"
-                }
-              },
-              "env": [
-                {
-                  "name": "SAKURA_OBJECT_STORAGE_BUCKET",
-                  "value": "${{ inputs.sakura-object-storage-bucket }}"
+        # Build environment variables array
+        ENV_VARS="[]"
+        if [ -n "${{ inputs.sakura-object-storage-bucket }}" ]; then
+          ENV_VARS=$(echo "$ENV_VARS" | jq '. + [{"name": "SAKURA_OBJECT_STORAGE_BUCKET", "value": "${{ inputs.sakura-object-storage-bucket }}"}]')
+        fi
+        if [ -n "${{ inputs.sakura-object-storage-access-key }}" ]; then
+          ENV_VARS=$(echo "$ENV_VARS" | jq '. + [{"name": "SAKURA_OBJECT_STORAGE_ACCESS_KEY", "value": "${{ inputs.sakura-object-storage-access-key }}"}]')
+        fi
+        if [ -n "${{ inputs.sakura-object-storage-secret-key }}" ]; then
+          ENV_VARS=$(echo "$ENV_VARS" | jq '. + [{"name": "SAKURA_OBJECT_STORAGE_SECRET_KEY", "value": "${{ inputs.sakura-object-storage-secret-key }}"}]')
+        fi
+        if [ -n "${{ inputs.sqlite-db-path }}" ]; then
+          ENV_VARS=$(echo "$ENV_VARS" | jq '. + [{"name": "SQLITE_DB_PATH", "value": "${{ inputs.sqlite-db-path }}"}]')
+        fi
+        if [ -n "${{ inputs.litestream-replicate-interval }}" ]; then
+          ENV_VARS=$(echo "$ENV_VARS" | jq '. + [{"name": "LITESTREAM_REPLICATE_INTERVAL", "value": "${{ inputs.litestream-replicate-interval }}"}]')
+        fi
+        
+        # Create request body with jq
+        REQUEST_BODY=$(jq -n \
+          --arg name "${{ steps.app-name.outputs.name }}" \
+          --arg timeout "${{ inputs.timeout-seconds }}" \
+          --arg port "${{ inputs.port }}" \
+          --arg component_name "${{ steps.app-name.outputs.name }}:${{ github.sha }}" \
+          --arg max_cpu "${{ inputs.max-cpu }}" \
+          --arg max_memory "${{ inputs.max-memory }}" \
+          --arg image "${{ inputs.container-registry }}/${{ steps.app-name.outputs.name }}:${{ github.sha }}" \
+          --arg server "${{ inputs.container-registry }}" \
+          --arg username "${{ inputs.container-registry-user }}" \
+          --arg password "${{ inputs.container-registry-password }}" \
+          --argjson env_vars "$ENV_VARS" \
+          '{
+            "name": $name,
+            "timeout_seconds": ($timeout | tonumber),
+            "port": ($port | tonumber),
+            "min_scale": 0,
+            "max_scale": 1,
+            "components": [
+              {
+                "name": $component_name,
+                "max_cpu": $max_cpu,
+                "max_memory": $max_memory,
+                "deploy_source": {
+                  "container_registry": {
+                    "image": $image,
+                    "server": $server,
+                    "username": $username,
+                    "password": $password
+                  }
                 },
-                {
-                  "name": "SAKURA_OBJECT_STORAGE_ACCESS_KEY", 
-                  "value": "${{ inputs.sakura-object-storage-access-key }}"
-                },
-                {
-                  "name": "SAKURA_OBJECT_STORAGE_SECRET_KEY",
-                  "value": "${{ inputs.sakura-object-storage-secret-key }}"
-                },
-                {
-                  "name": "SQLITE_DB_PATH",
-                  "value": "${{ inputs.sqlite-db-path }}"
-                },
-                {
-                  "name": "LITESTREAM_REPLICATE_INTERVAL",
-                  "value": "${{ inputs.litestream-replicate-interval }}"
-                }
-              ]
-            }
-          ]
-        }
-        EOF
-        )
+                "env": $env_vars
+              }
+            ]
+          }')
         
         # Check if application already exists
         APP_NAME="${{ steps.app-name.outputs.name }}"
