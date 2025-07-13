@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(source .env)",
+      "Bash(curl:*)",
+      "WebFetch(domain:manual.sakura.ad.jp)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:hono.dev)",
+      "Bash(ls:*)"
+    ],
+    "deny": []
+  }
+}

@@ -1,0 +1,160 @@
+name: 'Deploy Node.js to Sakura AppRun'
+description: 'Build and deploy Node.js applications to Sakura AppRun'
+author: 'Your Name'
+branding:
+  icon: 'cloud'
+  color: 'pink'
+
+inputs:
+  dockerfile-url:
+    description: 'URL to download Dockerfile from'
+    required: false
+    default: 'https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/Dockerfile.node'
+  sakura-api-key:
+    description: 'Sakura Cloud API Key'
+    required: true
+  sakura-api-secret:
+    description: 'Sakura Cloud API Secret'
+    required: true
+  container-registry:
+    description: 'Container registry URL (e.g., myregistry.sakuracr.jp)'
+    required: true
+  container-registry-user:
+    description: 'Container registry username'
+    required: true
+  container-registry-password:
+    description: 'Container registry password'
+    required: true
+  app-name:
+    description: 'Application name (defaults to repository name)'
+    required: false
+    default: ''
+  port:
+    description: 'Application port'
+    required: false
+    default: '3000'
+  max-cpu:
+    description: 'Maximum CPU (e.g., "1", "0.5")'
+    required: false
+    default: '0.5'
+  max-memory:
+    description: 'Maximum memory (e.g., "512Mi", "1Gi")'
+    required: false
+    default: '256Mi'
+  timeout-seconds:
+    description: 'Request timeout in seconds'
+    required: false
+    default: '300'
+
+outputs:
+  public-url:
+    description: 'The public URL of the deployed application'
+    value: ${{ steps.deploy.outputs.public-url }}
+  app-id:
+    description: 'The AppRun application ID'
+    value: ${{ steps.deploy.outputs.app-id }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Download Dockerfile if URL provided
+      if: ${{ inputs.dockerfile-url != '' }}
+      shell: bash
+      run: |
+        echo "Downloading Dockerfile from ${{ inputs.dockerfile-url }}"
+        curl -fsSL -o Dockerfile "${{ inputs.dockerfile-url }}"
+        
+    - name: Check Dockerfile exists
+      shell: bash
+      run: |
+        if [ ! -f Dockerfile ]; then
+          echo "Error: Dockerfile not found in repository and no dockerfile-url provided"
+          exit 1
+        fi
+        
+    - name: Set app name
+      id: app-name
+      shell: bash
+      run: |
+        APP_NAME="${{ inputs.app-name }}"
+        if [ -z "$APP_NAME" ]; then
+          APP_NAME="${{ github.event.repository.name }}"
+        fi
+        echo "name=${APP_NAME}" >> $GITHUB_OUTPUT
+        
+    - name: Login to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ inputs.container-registry }}
+        username: ${{ inputs.container-registry-user }}
+        password: ${{ inputs.container-registry-password }}
+        
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        platforms: linux/amd64
+        push: true
+        tags: ${{ inputs.container-registry }}/${{ steps.app-name.outputs.name }}:latest
+        
+    - name: Deploy to AppRun
+      id: deploy
+      shell: bash
+      run: |
+        # Create auth header
+        AUTH=$(echo -n "${{ inputs.sakura-api-key }}:${{ inputs.sakura-api-secret }}" | base64)
+        
+        # Create request body
+        REQUEST_BODY=$(cat <<EOF
+        {
+          "name": "${{ steps.app-name.outputs.name }}",
+          "timeout_seconds": ${{ inputs.timeout-seconds }},
+          "port": ${{ inputs.port }},
+          "min_scale": 0,
+          "max_scale": 1,
+          "components": [
+            {
+              "name": "${{ steps.app-name.outputs.name }}:latest",
+              "max_cpu": "${{ inputs.max-cpu }}",
+              "max_memory": "${{ inputs.max-memory }}",
+              "deploy_source": {
+                "container_registry": {
+                  "image": "${{ inputs.container-registry }}/${{ steps.app-name.outputs.name }}:latest",
+                  "server": "${{ inputs.container-registry }}",
+                  "username": "${{ inputs.container-registry-user }}",
+                  "password": "${{ inputs.container-registry-password }}"
+                }
+              }
+            }
+          ]
+        }
+        EOF
+        )
+        
+        # Deploy to AppRun
+        RESPONSE=$(curl -s -X POST \
+          -H "Authorization: Basic ${AUTH}" \
+          -H "Content-Type: application/json" \
+          -d "${REQUEST_BODY}" \
+          https://secure.sakura.ad.jp/cloud/api/apprun/1.0/apprun/api/applications)
+          
+        echo "Response: $RESPONSE"
+        
+        # Extract values
+        PUBLIC_URL=$(echo "$RESPONSE" | grep -o '"public_url":"[^"]*' | sed 's/"public_url":"//')
+        APP_ID=$(echo "$RESPONSE" | grep -o '"id":"[^"]*' | sed 's/"id":"//')
+        
+        # Set outputs
+        echo "public-url=${PUBLIC_URL}" >> $GITHUB_OUTPUT
+        echo "app-id=${APP_ID}" >> $GITHUB_OUTPUT
+        
+        if [ -n "$PUBLIC_URL" ]; then
+          echo "🚀 Successfully deployed to: $PUBLIC_URL"
+        else
+          echo "❌ Deployment failed"
+          echo "$RESPONSE"
+          exit 1
+        fi

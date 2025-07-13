@@ -1,0 +1,26 @@
+FROM node:22-alpine
+
+WORKDIR /app
+
+# package*.jsonをコピー（package-lock.jsonも含む）
+COPY package*.json ./
+
+# 本番用の依存関係のみインストール
+RUN npm ci --only=production || npm install --production
+
+# アプリケーションのソースをコピー
+COPY . .
+
+# ビルドステップ（必要な場合のみ実行）
+RUN npm run build || true
+
+# 環境変数
+ENV NODE_ENV=production
+ENV HOST=0.0.0.0
+ENV PORT=3000
+
+# ポート3000を公開
+EXPOSE 3000
+
+# npm startで起動
+CMD ["npm", "start"]
