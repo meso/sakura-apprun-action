@@ -105,7 +105,7 @@ runs:
       shell: bash
       run: |
         # Create auth header
-        AUTH=$(echo -n "${{ inputs.sakura-api-key }}:${{ inputs.sakura-api-secret }}" | base64)
+        AUTH=$(echo -n "${{ inputs.sakura-api-key }}:${{ inputs.sakura-api-secret }}" | base64 | tr -d '\n')
         
         # Create request body
         REQUEST_BODY=$(cat <<EOF
