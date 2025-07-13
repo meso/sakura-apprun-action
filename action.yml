@@ -135,13 +135,11 @@ runs:
         )
         
         # Deploy to AppRun
-        RESPONSE=$(curl -v -X POST \
+        RESPONSE=$(curl -s -X POST \
           -H "Authorization: Basic ${AUTH}" \
           -H "Content-Type: application/json" \
           -d "${REQUEST_BODY}" \
-          https://secure.sakura.ad.jp/cloud/api/apprun/1.0/apprun/api/applications 2>&1)
-          
-        echo "Response: $RESPONSE"
+          https://secure.sakura.ad.jp/cloud/api/apprun/1.0/apprun/api/applications)
         
         # Extract values
         PUBLIC_URL=$(echo "$RESPONSE" | grep -o '"public_url":"[^"]*' | sed 's/"public_url":"//')
