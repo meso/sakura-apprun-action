@@ -217,8 +217,16 @@ runs:
         fi
         
         # Extract values
-        PUBLIC_URL=$(echo "$RESPONSE" | grep -o '"public_url":"[^"]*' | sed 's/"public_url":"//')
-        APP_ID=$(echo "$RESPONSE" | grep -o '"id":"[^"]*' | sed 's/"id":"//')
+        echo "Debug: API Response received"
+        echo "Full response:"
+        echo "$RESPONSE"
+        echo "--- End of response ---"
+        
+        PUBLIC_URL=$(echo "$RESPONSE" | grep -o '"public_url":"[^"]*' | sed 's/"public_url":"//') || true
+        APP_ID=$(echo "$RESPONSE" | grep -o '"id":"[^"]*' | sed 's/"id":"//') || true
+        
+        echo "Debug: Extracted PUBLIC_URL='$PUBLIC_URL'"
+        echo "Debug: Extracted APP_ID='$APP_ID'"
         
         # Set outputs
         echo "public-url=${PUBLIC_URL}" >> $GITHUB_OUTPUT
