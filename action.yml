@@ -134,15 +134,12 @@ runs:
         EOF
         )
         
-        echo "REQUEST_BODY:"
-        echo "${REQUEST_BODY}"
-        
         # Deploy to AppRun
-        RESPONSE=$(curl -s -X POST \
+        RESPONSE=$(curl -v -X POST \
           -H "Authorization: Basic ${AUTH}" \
           -H "Content-Type: application/json" \
           -d "${REQUEST_BODY}" \
-          https://secure.sakura.ad.jp/cloud/api/apprun/1.0/apprun/api/applications)
+          https://secure.sakura.ad.jp/cloud/api/apprun/1.0/apprun/api/applications 2>&1)
           
         echo "Response: $RESPONSE"
         
