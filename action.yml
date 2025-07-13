@@ -99,6 +99,7 @@ runs:
         platforms: linux/amd64
         push: true
         tags: ${{ inputs.container-registry }}/${{ steps.app-name.outputs.name }}:latest
+        provenance: false
         
     - name: Deploy to AppRun
       id: deploy
