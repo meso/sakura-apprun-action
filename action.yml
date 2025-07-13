@@ -106,6 +106,7 @@ runs:
       run: |
         # Create auth header
         AUTH=$(echo -n "${{ inputs.sakura-api-key }}:${{ inputs.sakura-api-secret }}" | base64)
+        echo "AUTH starts with: ${AUTH:0:20}..."
         
         # Create request body
         REQUEST_BODY=$(cat <<EOF
