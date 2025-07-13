@@ -134,6 +134,9 @@ runs:
         EOF
         )
         
+        echo "REQUEST_BODY:"
+        echo "${REQUEST_BODY}"
+        
         # Deploy to AppRun
         RESPONSE=$(curl -s -X POST \
           -H "Authorization: Basic ${AUTH}" \
