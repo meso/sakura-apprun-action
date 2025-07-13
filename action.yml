@@ -194,6 +194,10 @@ runs:
             ]
           }')
         
+        echo "Debug: Request Body being sent:"
+        echo "$REQUEST_BODY"
+        echo "--- End of request body ---"
+        
         # Check if application already exists
         APP_NAME="${{ steps.app-name.outputs.name }}"
         EXISTING_APPS=$(curl -s -X GET \
