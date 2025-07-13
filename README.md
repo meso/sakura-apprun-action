@@ -7,7 +7,9 @@ Node.jsアプリケーションをさくらのクラウドAppRunへ自動ビル�
 - 🚀 Node.jsアプリの自動コンテナ化
 - 🌸 さくらのAppRunへ直接デプロイ
 - 📦 npm startでポート3000で起動するアプリに対応
-- 🏗️ ビルドステップ（npm run build）にも対応
+- 🏗️ TypeScriptビルド対応（マルチステージビルド）
+- 🔄 既存アプリケーションの自動更新
+- 🏷️ Git SHAベースの自動バージョニング
 - 🔐 安全な認証情報の管理
 
 ## 事前準備
@@ -22,7 +24,7 @@ Node.jsアプリケーションをさくらのクラウドAppRunへ自動ビル�
 
 ```yaml
 - name: さくらのAppRunへデプロイ
-  uses: meso/sakura-apprun-action@beta
+  uses: meso/sakura-apprun-action@v1
   with:
     sakura-api-key: ${{ secrets.SAKURA_API_KEY }}
     sakura-api-secret: ${{ secrets.SAKURA_API_SECRET }}
@@ -74,7 +76,7 @@ jobs:
       
     - name: さくらのAppRunへデプロイ
       id: deploy
-      uses: meso/sakura-apprun-action@beta
+      uses: meso/sakura-apprun-action@v1
       with:
         sakura-api-key: ${{ secrets.SAKURA_API_KEY }}
         sakura-api-secret: ${{ secrets.SAKURA_API_SECRET }}
@@ -112,7 +114,15 @@ A: 現在はnpm startのみ対応しています。package.jsonのscriptsにstar
 A: 以下を確認してください：
 - APIキーにAppRun権限があるか
 - コンテナレジストリの認証情報が正しいか
-- アプリケーション名が既に使用されていないか
+- アプリケーション名が既に使用されていないか（v1以降は自動的に更新されます）
+
+### Q: TypeScriptプロジェクトは対応していますか？
+
+A: はい、対応しています。package.jsonに`build`スクリプトが定義されていれば自動的にビルドされます。
+
+### Q: 既存のアプリケーションを更新できますか？
+
+A: はい、同名のアプリケーションが存在する場合は自動的に更新されます
 
 ## ライセンス
 
