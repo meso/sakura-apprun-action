@@ -22,7 +22,7 @@ Node.jsアプリケーションをさくらのクラウドAppRunへ自動ビル�
 
 ```yaml
 - name: さくらのAppRunへデプロイ
-  uses: meso/sakura-apprun-action@v1
+  uses: meso/sakura-apprun-action@beta
   with:
     sakura-api-key: ${{ secrets.SAKURA_API_KEY }}
     sakura-api-secret: ${{ secrets.SAKURA_API_SECRET }}
@@ -74,7 +74,7 @@ jobs:
       
     - name: さくらのAppRunへデプロイ
       id: deploy
-      uses: meso/sakura-apprun-action@v1
+      uses: meso/sakura-apprun-action@beta
       with:
         sakura-api-key: ${{ secrets.SAKURA_API_KEY }}
         sakura-api-secret: ${{ secrets.SAKURA_API_SECRET }}
@@ -82,7 +82,6 @@ jobs:
         container-registry-user: ${{ secrets.REGISTRY_USER }}
         container-registry-password: ${{ secrets.REGISTRY_PASSWORD }}
         port: '3000'
-        max-memory: '1Gi'
         
     - name: デプロイURLを表示
       run: |
