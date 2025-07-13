@@ -45,6 +45,26 @@ inputs:
     description: 'Request timeout in seconds'
     required: false
     default: '300'
+  sakura-object-storage-bucket:
+    description: 'Sakura Object Storage bucket name for SQLite backup (enables Litestream when all S3 credentials are provided)'
+    required: false
+    default: ''
+  sakura-object-storage-access-key:
+    description: 'Sakura Object Storage access key'
+    required: false
+    default: ''
+  sakura-object-storage-secret-key:
+    description: 'Sakura Object Storage secret key'
+    required: false
+    default: ''
+  sqlite-db-path:
+    description: 'Path to SQLite database file (required when using Litestream backup)'
+    required: false
+    default: ''
+  litestream-replicate-interval:
+    description: 'Litestream replication interval (e.g., "1s", "10s")'
+    required: false
+    default: '10s'
 
 outputs:
   public-url:
@@ -57,19 +77,28 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - name: Download Dockerfile if URL provided
-      if: ${{ inputs.dockerfile-url != '' }}
+    - name: Determine Dockerfile to use
+      id: dockerfile
       shell: bash
       run: |
-        echo "Downloading Dockerfile from ${{ inputs.dockerfile-url }}"
-        curl -fsSL -o Dockerfile "${{ inputs.dockerfile-url }}"
+        # Check if Litestream should be enabled
+        if [ -n "${{ inputs.sakura-object-storage-bucket }}" ] && \
+           [ -n "${{ inputs.sakura-object-storage-access-key }}" ] && \
+           [ -n "${{ inputs.sakura-object-storage-secret-key }}" ] && \
+           [ -n "${{ inputs.sqlite-db-path }}" ]; then
+          echo "Litestream backup enabled"
+          echo "use_litestream=true" >> $GITHUB_OUTPUT
+          DOCKERFILE_URL="${{ inputs.dockerfile-url || 'https://raw.githubusercontent.com/meso/sakura-apprun-action/main/Dockerfile.node-litestream' }}"
+        else
+          echo "Standard deployment (no Litestream)"
+          echo "use_litestream=false" >> $GITHUB_OUTPUT
+          DOCKERFILE_URL="${{ inputs.dockerfile-url || 'https://raw.githubusercontent.com/meso/sakura-apprun-action/main/Dockerfile.node' }}"
+        fi
         
-    - name: Check Dockerfile exists
-      shell: bash
-      run: |
+        # Download Dockerfile if not exists
         if [ ! -f Dockerfile ]; then
-          echo "Error: Dockerfile not found in repository and no dockerfile-url provided"
-          exit 1
+          echo "Downloading Dockerfile from $DOCKERFILE_URL"
+          curl -fsSL -o Dockerfile "$DOCKERFILE_URL"
         fi
         
     - name: Set app name
@@ -130,7 +159,29 @@ runs:
                   "username": "${{ inputs.container-registry-user }}",
                   "password": "${{ inputs.container-registry-password }}"
                 }
-              }
+              },
+              "env": [
+                {
+                  "name": "SAKURA_OBJECT_STORAGE_BUCKET",
+                  "value": "${{ inputs.sakura-object-storage-bucket }}"
+                },
+                {
+                  "name": "SAKURA_OBJECT_STORAGE_ACCESS_KEY", 
+                  "value": "${{ inputs.sakura-object-storage-access-key }}"
+                },
+                {
+                  "name": "SAKURA_OBJECT_STORAGE_SECRET_KEY",
+                  "value": "${{ inputs.sakura-object-storage-secret-key }}"
+                },
+                {
+                  "name": "SQLITE_DB_PATH",
+                  "value": "${{ inputs.sqlite-db-path }}"
+                },
+                {
+                  "name": "LITESTREAM_REPLICATE_INTERVAL",
+                  "value": "${{ inputs.litestream-replicate-interval }}"
+                }
+              ]
             }
           ]
         }

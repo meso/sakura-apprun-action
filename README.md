@@ -49,6 +49,39 @@ Node.jsアプリケーションをさくらのクラウドAppRunへ自動ビル�
 | `max-cpu` | 最大CPU | いいえ | `0.5` |
 | `max-memory` | 最大メモリ | いいえ | `256Mi` |
 | `timeout-seconds` | リクエストタイムアウト（秒） | いいえ | `300` |
+| `sakura-object-storage-bucket` | SQLiteバックアップ用のオブジェクトストレージバケット名 | いいえ | - |
+| `sakura-object-storage-access-key` | オブジェクトストレージのアクセスキー | いいえ | - |
+| `sakura-object-storage-secret-key` | オブジェクトストレージのシークレットキー | いいえ | - |
+| `sqlite-db-path` | SQLiteデータベースファイルのパス | いいえ | - |
+| `litestream-replicate-interval` | Litestreamレプリケーション間隔 | いいえ | `10s` |
+
+## Litestreamによる自動SQLiteバックアップ
+
+本Actionは、SQLiteデータベースの自動バックアップ機能を提供します。以下の全てのパラメータが設定されている場合、Litestreamが自動的に有効になります：
+
+- `sakura-object-storage-bucket`
+- `sakura-object-storage-access-key` 
+- `sakura-object-storage-secret-key`
+- `sqlite-db-path`
+
+### Litestreamを使用した例
+
+```yaml
+- name: さくらのAppRunへデプロイ（SQLiteバックアップ付き）
+  uses: meso/sakura-apprun-action@v1
+  with:
+    sakura-api-key: ${{ secrets.SAKURA_API_KEY }}
+    sakura-api-secret: ${{ secrets.SAKURA_API_SECRET }}
+    container-registry: MYREGISTRY.sakuracr.jp
+    container-registry-user: ${{ secrets.REGISTRY_USER }}
+    container-registry-password: ${{ secrets.REGISTRY_PASSWORD }}
+    # SQLite自動バックアップ設定
+    sakura-object-storage-bucket: my-backup-bucket
+    sakura-object-storage-access-key: ${{ secrets.S3_ACCESS_KEY }}
+    sakura-object-storage-secret-key: ${{ secrets.S3_SECRET_KEY }}
+    sqlite-db-path: ./database.sqlite
+    litestream-replicate-interval: 5s
+```
 
 ## 出力
 
@@ -123,6 +156,14 @@ A: はい、対応しています。package.jsonに`build`スクリプトが定�
 ### Q: 既存のアプリケーションを更新できますか？
 
 A: はい、同名のアプリケーションが存在する場合は自動的に更新されます
+
+### Q: SQLiteバックアップはどのように動作しますか？
+
+A: Litestreamを使用してリアルタイムでさくらのオブジェクトストレージにバックアップされます。全ての必要なパラメータが設定されている場合にのみ有効になります。
+
+### Q: Litestreamのバックアップ間隔を変更できますか？
+
+A: はい、`litestream-replicate-interval`パラメータで設定可能です（例：1s、10s、1m）。デフォルトは10秒です。
 
 ## ライセンス
 
