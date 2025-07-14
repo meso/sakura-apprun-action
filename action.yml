@@ -9,7 +9,7 @@ inputs:
   dockerfile-url:
     description: 'URL to download Dockerfile from'
     required: false
-    default: 'https://raw.githubusercontent.com/meso/sakura-apprun-action/main/Dockerfile.node'
+    default: ''
   sakura-api-key:
     description: 'Sakura Cloud API Key'
     required: true
