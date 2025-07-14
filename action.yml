@@ -45,15 +45,15 @@ inputs:
     description: 'Request timeout in seconds'
     required: false
     default: '300'
-  sakura-object-storage-bucket:
+  object-storage-bucket:
     description: 'Sakura Object Storage bucket name for SQLite backup (enables Litestream when all S3 credentials are provided)'
     required: false
     default: ''
-  sakura-object-storage-access-key:
+  object-storage-access-key:
     description: 'Sakura Object Storage access key'
     required: false
     default: ''
-  sakura-object-storage-secret-key:
+  object-storage-secret-key:
     description: 'Sakura Object Storage secret key'
     required: false
     default: ''
