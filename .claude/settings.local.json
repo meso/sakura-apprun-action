@@ -11,7 +11,8 @@
       "Bash(ls:*)",
       "Bash(docker manifest inspect:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "WebFetch(domain:litestream.io)"
     ],
     "deny": []
   }
