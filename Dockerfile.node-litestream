@@ -41,7 +41,7 @@ COPY <<'EOF' /app/setup-litestream.sh
 #!/bin/bash
 set -e
 
-echo "Starting Litestream setup..."
+echo "Starting Litestream setup..." > /proc/1/fd/1
 
 # Check if all required environment variables are set
 if [ -n "$SAKURA_OBJECT_STORAGE_BUCKET" ] && \
