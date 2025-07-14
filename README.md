@@ -46,12 +46,12 @@ Node.jsアプリケーションをさくらのクラウドAppRunへ自動ビル�
 | `container-registry-password` | レジストリのパスワード | はい | - |
 | `app-name` | アプリケーション名 | いいえ | リポジトリ名 |
 | `port` | アプリケーションのポート番号 | いいえ | `3000` |
-| `max-cpu` | 最大CPU | いいえ | `0.5` |
+| `max-cpu` | 最大CPU | いいえ | `0.4` |
 | `max-memory` | 最大メモリ | いいえ | `256Mi` |
 | `timeout-seconds` | リクエストタイムアウト（秒） | いいえ | `300` |
-| `sakura-object-storage-bucket` | SQLiteバックアップ用のオブジェクトストレージバケット名 | いいえ | - |
-| `sakura-object-storage-access-key` | オブジェクトストレージのアクセスキー | いいえ | - |
-| `sakura-object-storage-secret-key` | オブジェクトストレージのシークレットキー | いいえ | - |
+| `object-storage-bucket` | SQLiteバックアップ用のオブジェクトストレージバケット名 | いいえ | - |
+| `object-storage-access-key` | オブジェクトストレージのアクセスキー | いいえ | - |
+| `object-storage-secret-key` | オブジェクトストレージのシークレットキー | いいえ | - |
 | `sqlite-db-path` | SQLiteデータベースファイルのパス | いいえ | - |
 | `litestream-replicate-interval` | Litestreamレプリケーション間隔 | いいえ | `10s` |
 
@@ -59,9 +59,9 @@ Node.jsアプリケーションをさくらのクラウドAppRunへ自動ビル�
 
 本Actionは、SQLiteデータベースの自動バックアップ機能を提供します。以下の全てのパラメータが設定されている場合、Litestreamが自動的に有効になります：
 
-- `sakura-object-storage-bucket`
-- `sakura-object-storage-access-key` 
-- `sakura-object-storage-secret-key`
+- `object-storage-bucket`
+- `object-storage-access-key` 
+- `object-storage-secret-key`
 - `sqlite-db-path`
 
 ### Litestreamを使用した例
@@ -76,9 +76,9 @@ Node.jsアプリケーションをさくらのクラウドAppRunへ自動ビル�
     container-registry-user: ${{ secrets.REGISTRY_USER }}
     container-registry-password: ${{ secrets.REGISTRY_PASSWORD }}
     # SQLite自動バックアップ設定
-    sakura-object-storage-bucket: my-backup-bucket
-    sakura-object-storage-access-key: ${{ secrets.S3_ACCESS_KEY }}
-    sakura-object-storage-secret-key: ${{ secrets.S3_SECRET_KEY }}
+    object-storage-bucket: my-backup-bucket
+    object-storage-access-key: ${{ secrets.S3_ACCESS_KEY }}
+    object-storage-secret-key: ${{ secrets.S3_SECRET_KEY }}
     sqlite-db-path: ./database.sqlite
     litestream-replicate-interval: 5s
 ```
