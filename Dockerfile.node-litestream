@@ -18,8 +18,8 @@ RUN npm run build
 # 実行ステージ
 FROM node:22-alpine
 
-# Install supervisor and litestream
-RUN apk add --no-cache supervisor curl bash && \
+# Install litestream and dependencies
+RUN apk add --no-cache curl bash && \
     curl -L https://github.com/benbjohnson/litestream/releases/download/v0.3.13/litestream-v0.3.13-linux-amd64.tar.gz | tar -C /usr/local/bin -xzf -
 
 WORKDIR /app
@@ -42,6 +42,7 @@ COPY <<'EOF' /app/setup-litestream.sh
 set -e
 
 echo "Starting Litestream setup..." > /proc/1/fd/1
+sync
 
 # Check if all required environment variables are set
 if [ -n "$SAKURA_OBJECT_STORAGE_BUCKET" ] && \
@@ -78,43 +79,16 @@ dbs:
         sync-interval: ${LITESTREAM_REPLICATE_INTERVAL:-10s}
 LITESTREAM_EOF
 
-  # Create supervisord config with Litestream
-  cat > /etc/supervisord.conf <<SUPERVISOR_EOF
-[supervisord]
-nodaemon=true
-logfile=/dev/stdout
-logfile_maxbytes=0
-loglevel=info
-
-[program:litestream]
-command=/usr/local/bin/litestream replicate -v
-stdout_logfile=/dev/stdout
-stdout_logfile_maxbytes=0
-stderr_logfile=/dev/stderr
-stderr_logfile_maxbytes=0
-autorestart=true
-priority=1
-
-[program:app]
-command=npm start
-directory=/app
-stdout_logfile=/dev/stdout
-stdout_logfile_maxbytes=0
-stderr_logfile=/dev/stderr
-stderr_logfile_maxbytes=0
-autorestart=true
-priority=10
-environment=NODE_ENV="production",HOST="0.0.0.0",PORT="3000"
-SUPERVISOR_EOF
-
-  echo "Starting supervisord with Litestream and app..."
-  echo "Litestream config:"
-  cat /etc/litestream.yml
-  echo "---"
-  echo "Litestream will monitor $SQLITE_DB_PATH for changes and backup to s3://$SAKURA_OBJECT_STORAGE_BUCKET"
+  echo "Starting Litestream with integrated app monitoring..." > /proc/1/fd/1
+  echo "Litestream config:" > /proc/1/fd/1
+  cat /etc/litestream.yml > /proc/1/fd/1
+  echo "---" > /proc/1/fd/1
+  echo "Litestream will monitor $SQLITE_DB_PATH for changes and backup to s3://$SAKURA_OBJECT_STORAGE_BUCKET" > /proc/1/fd/1
+  sync
   
-  # Start with supervisord
-  exec /usr/bin/supervisord -c /etc/supervisord.conf
+  # Start Litestream with exec to run the app
+  cd /app
+  exec /usr/local/bin/litestream replicate -exec "npm start"
 else
   echo "Litestream backup not configured, starting app directly..."
   # Start app directly without supervisord
