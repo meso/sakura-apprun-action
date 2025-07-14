@@ -41,6 +41,8 @@ COPY <<'EOF' /app/setup-litestream.sh
 #!/bin/bash
 set -e
 
+echo "Starting Litestream setup..."
+
 # Check if all required environment variables are set
 if [ -n "$SAKURA_OBJECT_STORAGE_BUCKET" ] && \
    [ -n "$SAKURA_OBJECT_STORAGE_ACCESS_KEY" ] && \
@@ -52,7 +54,7 @@ if [ -n "$SAKURA_OBJECT_STORAGE_BUCKET" ] && \
   echo "DB Path: $SQLITE_DB_PATH"
   echo "Sync Interval: ${LITESTREAM_REPLICATE_INTERVAL:-10s}"
   
-  # Create directory for SQLite database if it doesn't exist
+  # Create directory for SQLite database if it does not exist
   mkdir -p "$(dirname "$SQLITE_DB_PATH")"
   
   # Check if SQLite database file exists (it may not exist on first run)

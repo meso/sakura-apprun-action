@@ -36,7 +36,7 @@ inputs:
   max-cpu:
     description: 'Maximum CPU (e.g., "1", "0.5")'
     required: false
-    default: '0.5'
+    default: '0.4'
   max-memory:
     description: 'Maximum memory (e.g., "512Mi", "1Gi")'
     required: false
