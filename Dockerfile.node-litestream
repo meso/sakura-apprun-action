@@ -52,7 +52,6 @@ if [ -n "$SAKURA_OBJECT_STORAGE_BUCKET" ] && \
   # Create directory for SQLite database if it does not exist
   mkdir -p "$(dirname "$SQLITE_DB_PATH")"
   
-  
   # Create Litestream config
   cat > /etc/litestream.yml <<LITESTREAM_EOF
 dbs:
@@ -67,11 +66,21 @@ dbs:
         sync-interval: ${LITESTREAM_REPLICATE_INTERVAL:-10s}
 LITESTREAM_EOF
 
+  # Restore database from backup if it doesn't exist
+  if [ ! -f "$SQLITE_DB_PATH" ]; then
+    echo "Database not found, attempting to restore from backup..."
+    if /usr/local/bin/litestream restore -config /etc/litestream.yml -if-replica-exists "$SQLITE_DB_PATH"; then
+      echo "Database restored successfully from backup"
+    else
+      echo "No backup found or restore failed, starting with fresh database"
+    fi
+  fi
+  
   echo "Starting Litestream with app integration..."
   
   # Start Litestream with exec to run the app
   cd /app
-  exec /usr/local/bin/litestream replicate -exec "npm start"
+  exec /usr/local/bin/litestream replicate -config /etc/litestream.yml -exec "npm start"
 else
   echo "Litestream backup not configured, starting app directly..."
   # Start app directly without supervisord
