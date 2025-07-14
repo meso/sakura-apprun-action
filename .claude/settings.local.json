@@ -9,7 +9,9 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebFetch(domain:hono.dev)",
       "Bash(ls:*)",
-      "Bash(docker manifest inspect:*)"
+      "Bash(docker manifest inspect:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": []
   }

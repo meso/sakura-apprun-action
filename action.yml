@@ -142,13 +142,13 @@ runs:
         # Build environment variables array
         ENV_VARS="[]"
         if [ -n "${{ inputs.object-storage-bucket }}" ]; then
-          ENV_VARS=$(echo "$ENV_VARS" | jq '. + [{"key": "SAKURA_OBJECT_STORAGE_BUCKET", "value": "${{ inputs.sakura-object-storage-bucket }}"}]')
+          ENV_VARS=$(echo "$ENV_VARS" | jq '. + [{"key": "SAKURA_OBJECT_STORAGE_BUCKET", "value": "${{ inputs.object-storage-bucket }}"}]')
         fi
         if [ -n "${{ inputs.object-storage-access-key }}" ]; then
-          ENV_VARS=$(echo "$ENV_VARS" | jq '. + [{"key": "SAKURA_OBJECT_STORAGE_ACCESS_KEY", "value": "${{ inputs.sakura-object-storage-access-key }}"}]')
+          ENV_VARS=$(echo "$ENV_VARS" | jq '. + [{"key": "SAKURA_OBJECT_STORAGE_ACCESS_KEY", "value": "${{ inputs.object-storage-access-key }}"}]')
         fi
         if [ -n "${{ inputs.object-storage-secret-key }}" ]; then
-          ENV_VARS=$(echo "$ENV_VARS" | jq '. + [{"key": "SAKURA_OBJECT_STORAGE_SECRET_KEY", "value": "${{ inputs.sakura-object-storage-secret-key }}"}]')
+          ENV_VARS=$(echo "$ENV_VARS" | jq '. + [{"key": "SAKURA_OBJECT_STORAGE_SECRET_KEY", "value": "${{ inputs.object-storage-secret-key }}"}]')
         fi
         if [ -n "${{ inputs.sqlite-db-path }}" ]; then
           ENV_VARS=$(echo "$ENV_VARS" | jq '. + [{"key": "SQLITE_DB_PATH", "value": "${{ inputs.sqlite-db-path }}"}]')
