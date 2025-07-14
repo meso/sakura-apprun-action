@@ -48,6 +48,19 @@ if [ -n "$SAKURA_OBJECT_STORAGE_BUCKET" ] && \
    [ -n "$SQLITE_DB_PATH" ]; then
   
   echo "Configuring Litestream backup..."
+  echo "Bucket: $SAKURA_OBJECT_STORAGE_BUCKET"
+  echo "DB Path: $SQLITE_DB_PATH"
+  echo "Sync Interval: ${LITESTREAM_REPLICATE_INTERVAL:-10s}"
+  
+  # Create directory for SQLite database if it doesn't exist
+  mkdir -p "$(dirname "$SQLITE_DB_PATH")"
+  
+  # Check if SQLite database file exists (it may not exist on first run)
+  if [ -f "$SQLITE_DB_PATH" ]; then
+    echo "SQLite database file found at $SQLITE_DB_PATH"
+  else
+    echo "SQLite database file will be created at $SQLITE_DB_PATH when app starts"
+  fi
   
   # Create Litestream config
   cat > /etc/litestream.yml <<LITESTREAM_EOF
@@ -72,7 +85,7 @@ logfile_maxbytes=0
 loglevel=info
 
 [program:litestream]
-command=/usr/local/bin/litestream replicate
+command=/usr/local/bin/litestream replicate -v
 stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes=0
 stderr_logfile=/dev/stderr
@@ -92,6 +105,12 @@ priority=10
 environment=NODE_ENV="production",HOST="0.0.0.0",PORT="3000"
 SUPERVISOR_EOF
 
+  echo "Starting supervisord with Litestream and app..."
+  echo "Litestream config:"
+  cat /etc/litestream.yml
+  echo "---"
+  echo "Litestream will monitor $SQLITE_DB_PATH for changes and backup to s3://$SAKURA_OBJECT_STORAGE_BUCKET"
+  
   # Start with supervisord
   exec /usr/bin/supervisord -c /etc/supervisord.conf
 else
