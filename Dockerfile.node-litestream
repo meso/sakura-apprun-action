@@ -41,9 +41,6 @@ COPY <<'EOF' /app/setup-litestream.sh
 #!/bin/bash
 set -e
 
-echo "Starting Litestream setup..." > /proc/1/fd/1
-sync
-
 # Check if all required environment variables are set
 if [ -n "$SAKURA_OBJECT_STORAGE_BUCKET" ] && \
    [ -n "$SAKURA_OBJECT_STORAGE_ACCESS_KEY" ] && \
@@ -51,19 +48,10 @@ if [ -n "$SAKURA_OBJECT_STORAGE_BUCKET" ] && \
    [ -n "$SQLITE_DB_PATH" ]; then
   
   echo "Configuring Litestream backup..."
-  echo "Bucket: $SAKURA_OBJECT_STORAGE_BUCKET"
-  echo "DB Path: $SQLITE_DB_PATH"
-  echo "Sync Interval: ${LITESTREAM_REPLICATE_INTERVAL:-10s}"
   
   # Create directory for SQLite database if it does not exist
   mkdir -p "$(dirname "$SQLITE_DB_PATH")"
   
-  # Check if SQLite database file exists (it may not exist on first run)
-  if [ -f "$SQLITE_DB_PATH" ]; then
-    echo "SQLite database file found at $SQLITE_DB_PATH"
-  else
-    echo "SQLite database file will be created at $SQLITE_DB_PATH when app starts"
-  fi
   
   # Create Litestream config
   cat > /etc/litestream.yml <<LITESTREAM_EOF
@@ -79,12 +67,7 @@ dbs:
         sync-interval: ${LITESTREAM_REPLICATE_INTERVAL:-10s}
 LITESTREAM_EOF
 
-  echo "Starting Litestream with integrated app monitoring..." > /proc/1/fd/1
-  echo "Litestream config:" > /proc/1/fd/1
-  cat /etc/litestream.yml > /proc/1/fd/1
-  echo "---" > /proc/1/fd/1
-  echo "Litestream will monitor $SQLITE_DB_PATH for changes and backup to s3://$SAKURA_OBJECT_STORAGE_BUCKET" > /proc/1/fd/1
-  sync
+  echo "Starting Litestream with app integration..."
   
   # Start Litestream with exec to run the app
   cd /app
