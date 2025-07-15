@@ -88,11 +88,11 @@ runs:
            [ -n "${{ inputs.sqlite-db-path }}" ]; then
           echo "Litestream backup enabled"
           echo "use_litestream=true" >> $GITHUB_OUTPUT
-          DOCKERFILE_URL="${{ inputs.dockerfile-url || 'https://raw.githubusercontent.com/meso/sakura-apprun-action/main/Dockerfile.node-litestream' }}"
+          DOCKERFILE_URL="${{ inputs.dockerfile-url || 'https://raw.githubusercontent.com/meso/sakura-apprun-action/main/Dockerfile.unified-litestream' }}"
         else
           echo "Standard deployment (no Litestream)"
           echo "use_litestream=false" >> $GITHUB_OUTPUT
-          DOCKERFILE_URL="${{ inputs.dockerfile-url || 'https://raw.githubusercontent.com/meso/sakura-apprun-action/main/Dockerfile.node' }}"
+          DOCKERFILE_URL="${{ inputs.dockerfile-url || 'https://raw.githubusercontent.com/meso/sakura-apprun-action/main/Dockerfile.unified' }}"
         fi
         
         # Download Dockerfile if not exists
@@ -130,6 +130,8 @@ runs:
         tags: |
           ${{ inputs.container-registry }}/${{ steps.app-name.outputs.name }}:latest
           ${{ inputs.container-registry }}/${{ steps.app-name.outputs.name }}:${{ github.sha }}
+        build-args: |
+          PORT=${{ inputs.port }}
         provenance: false
         
     - name: Deploy to AppRun
