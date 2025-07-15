@@ -65,6 +65,10 @@ inputs:
     description: 'Litestream replication interval (e.g., "1s", "10s")'
     required: false
     default: '10s'
+  use-project-dockerfile:
+    description: 'Use project Dockerfile instead of auto-generated one'
+    required: false
+    default: 'true'
 
 outputs:
   public-url:
@@ -95,8 +99,10 @@ runs:
           DOCKERFILE_URL="${{ inputs.dockerfile-url || 'https://raw.githubusercontent.com/meso/sakura-apprun-action/main/Dockerfile.unified' }}"
         fi
         
-        # Download Dockerfile if not exists
-        if [ ! -f Dockerfile ]; then
+        # Download Dockerfile based on configuration
+        if [ "${{ inputs.use-project-dockerfile }}" = "true" ] && [ -f Dockerfile ]; then
+          echo "Using project Dockerfile"
+        else
           echo "Downloading Dockerfile from $DOCKERFILE_URL"
           curl -fsSL -o Dockerfile "$DOCKERFILE_URL"
         fi
