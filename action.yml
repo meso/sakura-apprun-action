@@ -228,7 +228,7 @@ runs:
         
         # Extract app ID if exists
         echo "Debug: Extracting app ID for app name: $APP_NAME"
-        APP_ID=$(echo "$EXISTING_APPS" | grep -o "\"id\":\"[^\"]*\".*\"name\":\"$APP_NAME\"" | grep -o "\"id\":\"[^\"]*\"" | sed 's/"id":"//' | sed 's/"//')
+        APP_ID=$(echo "$EXISTING_APPS" | grep -o "\"id\":\"[^\"]*\".*\"name\":\"$APP_NAME\"" | grep -o "\"id\":\"[^\"]*\"" | sed 's/"id":"//' | sed 's/"//' || true)
         echo "Debug: Extracted APP_ID: '$APP_ID'"
         
         if [ -n "$APP_ID" ]; then
