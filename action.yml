@@ -92,11 +92,11 @@ runs:
            [ -n "${{ inputs.sqlite-db-path }}" ]; then
           echo "Litestream backup enabled"
           echo "use_litestream=true" >> $GITHUB_OUTPUT
-          DOCKERFILE_URL="${{ inputs.dockerfile-url || 'https://raw.githubusercontent.com/meso/sakura-apprun-action/main/Dockerfile.node-litestream' }}"
+          DOCKERFILE_URL="${{ inputs.dockerfile-url || 'https://raw.githubusercontent.com/meso/sakura-apprun-action/${{ github.action_ref }}/Dockerfile.node-litestream' }}"
         else
           echo "Standard deployment (no Litestream)"
           echo "use_litestream=false" >> $GITHUB_OUTPUT
-          DOCKERFILE_URL="${{ inputs.dockerfile-url || 'https://raw.githubusercontent.com/meso/sakura-apprun-action/main/Dockerfile.node' }}"
+          DOCKERFILE_URL="${{ inputs.dockerfile-url || 'https://raw.githubusercontent.com/meso/sakura-apprun-action/${{ github.action_ref }}/Dockerfile.node' }}"
         fi
         
         # Download Dockerfile based on configuration
