@@ -211,7 +211,7 @@ runs:
           https://secure.sakura.ad.jp/cloud/api/apprun/1.0/apprun/api/applications)
         
         # Extract app ID if exists
-        APP_ID=$(echo "$EXISTING_APPS" | grep -o "\"id\":\"[^\"]*\".*\"name\":\"$APP_NAME\"" | grep -o "\"id\":\"[^\"]*\"" | sed 's/"id":"//' | sed 's/"//' || true)
+        APP_ID=$(echo "$EXISTING_APPS" | jq -r ".data[] | select(.name == \"$APP_NAME\") | .id" || true)
         
         if [ -n "$APP_ID" ]; then
           echo "Updating existing application: $APP_ID"
