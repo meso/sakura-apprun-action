@@ -59,6 +59,7 @@ echo "Debug: SAKURA_OBJECT_STORAGE_ACCESS_KEY='$SAKURA_OBJECT_STORAGE_ACCESS_KEY
 echo "Debug: SAKURA_OBJECT_STORAGE_SECRET_KEY='$SAKURA_OBJECT_STORAGE_SECRET_KEY'"
 echo "Debug: SQLITE_DB_PATH='$SQLITE_DB_PATH'"
 echo "Debug: APP_NAME='$APP_NAME'"
+sync
 
 # Check if all required environment variables are set
 if [ -n "$SAKURA_OBJECT_STORAGE_BUCKET" ] && \
@@ -67,6 +68,7 @@ if [ -n "$SAKURA_OBJECT_STORAGE_BUCKET" ] && \
    [ -n "$SQLITE_DB_PATH" ]; then
   
   echo "Configuring Litestream backup..."
+  sync
   
   # Create directory for SQLite database if it does not exist
   mkdir -p "$(dirname "$SQLITE_DB_PATH")"
@@ -96,6 +98,7 @@ LITESTREAM_EOF
   fi
   
   echo "Starting Litestream with app integration..."
+  sync
   
   # Start Litestream with exec to run the app
   cd /app
@@ -103,6 +106,7 @@ LITESTREAM_EOF
 else
   echo "Litestream backup not configured, starting app directly..."
   echo "Debug: Missing environment variables, falling back to direct npm start"
+  sync
   # Start app directly without litestream
   exec npm start
 fi
