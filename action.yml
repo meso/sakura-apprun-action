@@ -92,11 +92,11 @@ runs:
            [ -n "${{ inputs.sqlite-db-path }}" ]; then
           echo "Litestream backup enabled"
           echo "use_litestream=true" >> $GITHUB_OUTPUT
-          DOCKERFILE_URL="${{ inputs.dockerfile-url || 'https://raw.githubusercontent.com/meso/sakura-apprun-action/main/Dockerfile.unified-litestream' }}"
+          DOCKERFILE_URL="${{ inputs.dockerfile-url || 'https://raw.githubusercontent.com/meso/sakura-apprun-action/main/Dockerfile.node-litestream' }}"
         else
           echo "Standard deployment (no Litestream)"
           echo "use_litestream=false" >> $GITHUB_OUTPUT
-          DOCKERFILE_URL="${{ inputs.dockerfile-url || 'https://raw.githubusercontent.com/meso/sakura-apprun-action/main/Dockerfile.unified' }}"
+          DOCKERFILE_URL="${{ inputs.dockerfile-url || 'https://raw.githubusercontent.com/meso/sakura-apprun-action/main/Dockerfile.node' }}"
         fi
         
         # Download Dockerfile based on configuration
@@ -169,9 +169,6 @@ runs:
         ENV_VARS=$(echo "$ENV_VARS" | jq '. + [{"key": "APP_NAME", "value": "${{ steps.app-name.outputs.name }}"}]')
         
         # Create request body with jq
-        echo "Debug: Creating request body with jq..."
-        echo "Debug: ENV_VARS content: $ENV_VARS"
-        
         REQUEST_BODY=$(jq -n \
           --arg name "${{ steps.app-name.outputs.name }}" \
           --arg timeout "${{ inputs.timeout-seconds }}" \
@@ -208,34 +205,15 @@ runs:
             ]
           }')
         
-        JQ_EXIT_CODE=$?
-        echo "Debug: jq exit code: $JQ_EXIT_CODE"
-        if [ $JQ_EXIT_CODE -ne 0 ]; then
-          echo "Error: jq command failed with exit code $JQ_EXIT_CODE"
-          exit 1
-        fi
-        
-        echo "Debug: Request Body being sent:"
-        echo "$REQUEST_BODY"
-        echo "--- End of request body ---"
-        
         # Check if application already exists
         APP_NAME="${{ steps.app-name.outputs.name }}"
-        echo "Debug: Checking existing applications for app name: $APP_NAME"
-        
         EXISTING_APPS=$(curl -s -X GET \
           -H "Authorization: Basic ${AUTH}" \
           -H "Content-Type: application/json" \
           https://secure.sakura.ad.jp/cloud/api/apprun/1.0/apprun/api/applications)
         
-        echo "Debug: Existing apps response:"
-        echo "$EXISTING_APPS"
-        echo "--- End of existing apps response ---"
-        
         # Extract app ID if exists
-        echo "Debug: Extracting app ID for app name: $APP_NAME"
         APP_ID=$(echo "$EXISTING_APPS" | grep -o "\"id\":\"[^\"]*\".*\"name\":\"$APP_NAME\"" | grep -o "\"id\":\"[^\"]*\"" | sed 's/"id":"//' | sed 's/"//' || true)
-        echo "Debug: Extracted APP_ID: '$APP_ID'"
         
         if [ -n "$APP_ID" ]; then
           echo "Updating existing application: $APP_ID"
@@ -256,16 +234,8 @@ runs:
         fi
         
         # Extract values
-        echo "Debug: API Response received"
-        echo "Full response:"
-        echo "$RESPONSE"
-        echo "--- End of response ---"
-        
         PUBLIC_URL=$(echo "$RESPONSE" | grep -o '"public_url":"[^"]*' | sed 's/"public_url":"//') || true
         APP_ID=$(echo "$RESPONSE" | grep -o '"id":"[^"]*' | sed 's/"id":"//') || true
-        
-        echo "Debug: Extracted PUBLIC_URL='$PUBLIC_URL'"
-        echo "Debug: Extracted APP_ID='$APP_ID'"
         
         # Set outputs
         echo "public-url=${PUBLIC_URL}" >> $GITHUB_OUTPUT
