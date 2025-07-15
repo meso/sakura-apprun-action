@@ -61,8 +61,8 @@ inputs:
     description: 'Litestream replication interval (e.g., "1s", "10s")'
     required: false
     default: '10s'
-  use-project-dockerfile:
-    description: 'Use project Dockerfile instead of auto-generated one'
+  use-repository-dockerfile:
+    description: 'Use repository Dockerfile instead of optimized one'
     required: false
     default: 'true'
 
@@ -98,8 +98,8 @@ runs:
         fi
         
         # Download Dockerfile based on configuration
-        if [ "${{ inputs.use-project-dockerfile }}" = "true" ] && [ -f Dockerfile ]; then
-          echo "Using project Dockerfile"
+        if [ "${{ inputs.use-repository-dockerfile }}" = "true" ] && [ -f Dockerfile ]; then
+          echo "Using repository Dockerfile"
         else
           echo "Downloading Dockerfile from $DOCKERFILE_URL"
           curl -fsSL -o Dockerfile "$DOCKERFILE_URL"
