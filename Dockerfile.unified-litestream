@@ -53,6 +53,13 @@ COPY <<'EOF' /app/setup-litestream.sh
 #!/bin/bash
 set -e
 
+echo "Debug: Checking Litestream environment variables..."
+echo "Debug: SAKURA_OBJECT_STORAGE_BUCKET='$SAKURA_OBJECT_STORAGE_BUCKET'"
+echo "Debug: SAKURA_OBJECT_STORAGE_ACCESS_KEY='$SAKURA_OBJECT_STORAGE_ACCESS_KEY'"
+echo "Debug: SAKURA_OBJECT_STORAGE_SECRET_KEY='$SAKURA_OBJECT_STORAGE_SECRET_KEY'"
+echo "Debug: SQLITE_DB_PATH='$SQLITE_DB_PATH'"
+echo "Debug: APP_NAME='$APP_NAME'"
+
 # Check if all required environment variables are set
 if [ -n "$SAKURA_OBJECT_STORAGE_BUCKET" ] && \
    [ -n "$SAKURA_OBJECT_STORAGE_ACCESS_KEY" ] && \
@@ -95,6 +102,7 @@ LITESTREAM_EOF
   exec /usr/local/bin/litestream replicate -config /etc/litestream.yml -exec "npm start"
 else
   echo "Litestream backup not configured, starting app directly..."
+  echo "Debug: Missing environment variables, falling back to direct npm start"
   # Start app directly without litestream
   exec npm start
 fi
