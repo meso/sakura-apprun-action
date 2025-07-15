@@ -23,6 +23,9 @@ RUN if [ -f package.json ]; then \
       fi \
     fi
 
+# 存在しないディレクトリを作成（COPYエラーを防ぐため）
+RUN mkdir -p dist .next build public
+
 # 実行ステージ
 FROM node:22-alpine
 
@@ -39,10 +42,10 @@ COPY package*.json ./
 RUN npm ci --only=production || npm install --production
 
 # フレームワーク別の成果物をコピー
-# HonoX: dist/ (public も含まれる)
-# Next.js: .next/ + public/ (public は別途必要)
-# React Router: build/ + public/ (public は別途必要)
-COPY --from=builder /app/dist /app/.next /app/build ./
+# 全てのフレームワークのビルド成果物をコピー（ビルダーステージですべて作成済み）
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/build ./build
 COPY --from=builder /app/public ./public
 
 # Litestream設定ファイルとSupervisord設定を生成するスクリプト
