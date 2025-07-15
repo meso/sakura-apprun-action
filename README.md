@@ -42,7 +42,7 @@ SQLite のデータベースファイルを Litestream を使って自動でオ�
 
 ```yaml
 - name: さくらのAppRunへデプロイ
-  uses: meso/sakura-apprun-action@v1
+  uses: meso/sakura-apprun-action@v3
   with:
     sakura-api-key: ${{ secrets.SAKURA_API_KEY }}
     sakura-api-secret: ${{ secrets.SAKURA_API_SECRET }}
@@ -55,7 +55,7 @@ SQLite のデータベースファイルを Litestream を使って自動でオ�
 
 ```yaml
 - name: さくらのAppRunへデプロイ
-  uses: meso/sakura-apprun-action@v1
+  uses: meso/sakura-apprun-action@v3
   with:
     sakura-api-key: ${{ secrets.SAKURA_API_KEY }}
     sakura-api-secret: ${{ secrets.SAKURA_API_SECRET }}
@@ -127,8 +127,8 @@ SQLite のデータベースファイルを Litestream を使って自動でオ�
 ### Litestreamを使用した例
 
 ```yaml
-- name: さくらのAppRunへデプロイ（SQLiteバックアップ付き）
-  uses: meso/sakura-apprun-action@v1
+- name: さくらのAppRunへデプロイ
+  uses: meso/sakura-apprun-action@v3
   with:
     sakura-api-key: ${{ secrets.SAKURA_API_KEY }}
     sakura-api-secret: ${{ secrets.SAKURA_API_SECRET }}
@@ -171,7 +171,7 @@ jobs:
       
     - name: さくらのAppRunへデプロイ
       id: deploy
-      uses: meso/sakura-apprun-action@v1
+      uses: meso/sakura-apprun-action@v3
       with:
         sakura-api-key: ${{ secrets.SAKURA_API_KEY }}
         sakura-api-secret: ${{ secrets.SAKURA_API_SECRET }}
@@ -204,7 +204,7 @@ jobs:
       
     - name: さくらのAppRunへデプロイ（SQLiteバックアップ付き）
       id: deploy
-      uses: meso/sakura-apprun-action@v1
+      uses: meso/sakura-apprun-action@v3
       with:
         sakura-api-key: ${{ secrets.SAKURA_API_KEY }}
         sakura-api-secret: ${{ secrets.SAKURA_API_SECRET }}
