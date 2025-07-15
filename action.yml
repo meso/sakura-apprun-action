@@ -159,6 +159,9 @@ runs:
           ENV_VARS=$(echo "$ENV_VARS" | jq '. + [{"key": "LITESTREAM_REPLICATE_INTERVAL", "value": "${{ inputs.litestream-replicate-interval }}"}]')
         fi
         
+        # Add app name for Litestream path organization
+        ENV_VARS=$(echo "$ENV_VARS" | jq '. + [{"key": "APP_NAME", "value": "${{ steps.app-name.outputs.name }}"}]')
+        
         # Create request body with jq
         REQUEST_BODY=$(jq -n \
           --arg name "${{ steps.app-name.outputs.name }}" \

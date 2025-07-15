@@ -72,7 +72,7 @@ dbs:
       - type: s3
         endpoint: https://s3.isk01.sakurastorage.jp
         bucket: $SAKURA_OBJECT_STORAGE_BUCKET
-        path: ${SQLITE_DB_PATH##*/}
+        path: ${APP_NAME}/${SQLITE_DB_PATH##*/}
         access-key-id: $SAKURA_OBJECT_STORAGE_ACCESS_KEY
         secret-access-key: $SAKURA_OBJECT_STORAGE_SECRET_KEY
         sync-interval: ${LITESTREAM_REPLICATE_INTERVAL:-10s}
