@@ -137,8 +137,8 @@ SQLite のデータベースファイルを Litestream を使って自動でオ�
     container-registry-password: ${{ secrets.REGISTRY_PASSWORD }}
     # SQLiteレプリケーション設定
     object-storage-bucket: my-backup-bucket
-    object-storage-access-key: ${{ secrets.S3_ACCESS_KEY }}
-    object-storage-secret-key: ${{ secrets.S3_SECRET_KEY }}
+    object-storage-access-key: ${{ secrets.STORAGE_ACCESS_KEY }}
+    object-storage-secret-key: ${{ secrets.STORAGE_SECRET_KEY }}
     sqlite-db-path: ./database.sqlite
     litestream-replicate-interval: 5s
 ```
@@ -213,8 +213,8 @@ jobs:
         container-registry-password: ${{ secrets.REGISTRY_PASSWORD }}
         # SQLiteレプリケーション設定
         object-storage-bucket: my-backup-bucket
-        object-storage-access-key: ${{ secrets.S3_ACCESS_KEY }}
-        object-storage-secret-key: ${{ secrets.S3_SECRET_KEY }}
+        object-storage-access-key: ${{ secrets.STORAGE_ACCESS_KEY }}
+        object-storage-secret-key: ${{ secrets.STORAGE_SECRET_KEY }}
         sqlite-db-path: ./data/app.db
         litestream-replicate-interval: 10s
         
@@ -235,8 +235,8 @@ GitHubリポジトリの Settings > Secrets and variables > Actions で以下を
 - `REGISTRY_PASSWORD`: さくらのコンテナレジストリのパスワード
 
 **SQLiteバックアップに必要な追加シークレット:**
-- `S3_ACCESS_KEY`: さくらのオブジェクトストレージアクセスキー
-- `S3_SECRET_KEY`: さくらのオブジェクトストレージシークレットキー
+- `STORAGE_ACCESS_KEY`: さくらのオブジェクトストレージアクセスキー
+- `STORAGE_SECRET_KEY`: さくらのオブジェクトストレージシークレットキー
 
 ## よくある質問
 
