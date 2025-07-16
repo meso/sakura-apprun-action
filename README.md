@@ -21,9 +21,9 @@ SQLite のデータベースファイルを Litestream を使って自動でオ�
 
 このActionは以下のNode.jsフレームワークを自動で検出し、適切なビルドプロセスを実行します：
 
-- **[HonoX](https://github.com/honojs/honox)**: モダンなWebフレームワーク
-- **[Next.js](https://nextjs.org/)**: React生産性向上フレームワーク
-- **[React Router](https://reactrouter.com/)**: React用フルスタックフレームワーク
+- **[HonoX](https://github.com/honojs/honox)** - [サンプル](https://github.com/meso/honox-node)
+- **[Next.js](https://nextjs.org/)** - [サンプル](https://github.com/meso/next-sample)
+- **[React Router](https://reactrouter.com/)** - [サンプル](https://github.com/meso/reactrouter-todo-app)
 
 フレームワークの検出は`package.json`の依存関係から自動的に行われます。
 
